@@ -1,0 +1,20 @@
+.edit-container {
+    padding-top: 50px;
+    max-width: 50%;
+    margin: 0 auto;
+}
+
+.edit-container h1 {
+    margin-bottom: 50px;
+}
+
+.edit-container .form-group {
+    margin: 0 auto;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.edit-container button {
+    float: right;
+    margin-right: 10px;
+}

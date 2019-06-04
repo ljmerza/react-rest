@@ -1,3 +1,4 @@
 
 
-export const baseApiUrl = 'http://dummy.restapiexample.com/api/v1';
+const username = 'lmerza';
+export const baseApiUrl = `https://us-central1-mbtcandidate.cloudfunctions.net/posts/${username}`;

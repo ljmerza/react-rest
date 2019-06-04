@@ -1,0 +1,20 @@
+
+
+.blog-post .card-title {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.blog-post .card-title div:first-child {
+    width: 60%;
+    text-align: left;
+}
+
+.blog-post .card-text {
+    text-align: left;
+}
+
+.blog-post .btn-group {
+    float: right;
+}

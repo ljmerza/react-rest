@@ -1,29 +1,26 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import Form from 'react-bootstrap/Form';
 import Alert from 'react-bootstrap/Alert';
+import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
+import Spinner from 'react-bootstrap/Spinner';
 
 import './index.css';
-import request from 'utils';
+import request from 'utils/request';
 import { baseApiUrl } from 'utils/const';
 
 
-export default class Contact extends Component {
+class Edit extends Component {
     constructor(props) {
         super(props);
-
-        this.defaultFormState = {
-            employee_name: '',
-            employee_age: '',
-            employee_salary: ''
-        }
         
         this.state = {
-            body: { ...this.defaultFormState },
+            post: { ...this.props.post },
             success: '',
             error: '',
+            loading: false,
             id: (props.match && props.match.params && props.match.params.id) || null,
         };
 
@@ -34,106 +31,107 @@ export default class Contact extends Component {
     }
 
     componentDidMount() {
+
+        // if given a post id then fetch psot for edit else is a new post
         if(this.state.id !== null){
             this.setState({ loading: true }, this.getData);
         }
     }
 
     getData() {
-        request(`${baseApiUrl}/employee/${this.state.id}`)
-            .then(body => this.setState({ body, loading: false }))
-            .catch(error => this.setState({ error, loading: false }));
+        this.setState({ loading: true }, () => {
+            request(`${baseApiUrl}/${this.state.id}`)
+                .then(post => {
+                    this.setState({ post, loading: false })
+                })
+                .catch(error => {
+                    this.setState({ error, loading: false })
+                });
+        });
     }
 
     handleChange(event) {
         event.preventDefault();
         const { id, value } = event.target;
         
-        const body = { ...this.state.body, [id]: value };
-        this.setState({ body });
+        const post = { ...this.state.post, [id]: value };
+        this.setState({ post });
     }
 
     handleSubmit(event) {
         event.preventDefault();
-        const urlPath = this.state.id ? `update/${this.state.id}` : 'create';
-        const method = this.state.id ? `PUT` : 'POST';
+        const postBody = { ...this.state.post };
+        postBody.timestamp = postBody.timestamp || new Date();
 
-        const postBody = Object.keys(this.state.body).reduce((acc, curr) => {
-            acc[ curr.split('_')[1] ] = this.state.body[curr];
-            return acc;
-        }, {});
+        this.setState({ loading: true }, () => {
 
-        request(`${baseApiUrl}/${urlPath}`, {
-            method: method,
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(postBody)
-        })
-            .then(response => {
-                this.handleFormResponse({ success: 'Saved!' });
+            request(`${baseApiUrl}/${this.state.id || ''}`, {
+                method: this.state.id ? `PUT` : 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(postBody)
             })
-            .catch(error => {
-                this.handleFormResponse({ error: 'Error!' });
-            });
+                .then(success => {
+                    this.handleFormResponse({ success });
+                })
+                .catch(error => {
+                    this.handleFormResponse({ error });
+                });
+        });
     }
 
     handleFormResponse({ error = '', success = '' }) {
-        this.setState({ success, error, body: { ...this.defaultFormState } });
+        const posts = this.state.id ? this.state.post : this.props.post;
+        this.setState({ success, error, post: { ...posts }, loading: false });
     }
 
     render(){
         return (
-            <header className="App-header">
-                {this.state.success ? <Alert variant='success'>{this.state.success}</Alert> : null}
-                {this.state.error ? <Alert variant='danger'>{this.state.error}</Alert> : null}
+            <header className="edit-container">
+                {this.state.loading ? <Spinner animation="border" variant='primary' /> : 
+                    <Fragment>
+                        {this.state.success ? <Alert variant='success'>{this.state.success}</Alert> : null}
+                        {this.state.error ? <Alert variant='danger'>{this.state.error}</Alert> : null}
 
-                <Form onSubmit={this.handleSubmit}>
-                    <Form.Row>
-                        <Form.Group as={Col} controlId="employee_name">
-                            <Form.Label>Name</Form.Label>
-                            <Form.Control type='text' value={this.state.body.employee_name} onChange={this.handleChange}/>
-                        </Form.Group>
-                    </Form.Row>
+                        <h1>{ this.state.id ? 'Edit Post' : 'New Post'}</h1>
 
-                    <Form.Row>
-                        <Form.Group as={Col} controlId="employee_age">
-                            <Form.Label>Age</Form.Label>
-                            <Form.Control type='text' value={this.state.body.employee_age} onChange={this.handleChange}/>
-                        </Form.Group>
-                        <Form.Group as={Col} controlId="employee_salary">
-                            <Form.Label>Salary</Form.Label>
-                            <Form.Control type='text' value={this.state.body.employee_salary} onChange={this.handleChange}/>
-                        </Form.Group>
-                    </Form.Row>
+                        <Form onSubmit={this.handleSubmit}>
+                            <Form.Row>
+                                <Form.Group as={Row} controlId="title">
+                                    <Form.Label column sm="4">Title</Form.Label>
+                                    <Col sm="8">
+                                        <Form.Control type='text' value={this.state.post.title} onChange={this.handleChange}/>
+                                    </Col>
+                                </Form.Group>
+                            </Form.Row>
 
-                    <Form.Row>
-                        <Form.Group as={Col} controlId="formGridCity">
-                            <Form.Label>City</Form.Label>
-                            <Form.Control />
-                        </Form.Group>
-                        <Form.Group as={Col} controlId="formGridState">
-                            <Form.Label>State</Form.Label>
-                            <Form.Control as="select">
-                                <option>Choose...</option>
-                                <option>...</option>
-                            </Form.Control>
-                        </Form.Group>
-                        <Form.Group as={Col} controlId="formGridZip">
-                            <Form.Label>Zip</Form.Label>
-                            <Form.Control />
-                        </Form.Group>
-                    </Form.Row>
+                            <Form.Row>
+                                <Form.Group as={Row} controlId="text">
+                                    <Form.Label column sm="4">Text</Form.Label>
+                                    <Col sm="8">
+                                        <Form.Control as="textarea" rows="10" value={this.state.post.text} onChange={this.handleChange}/>
+                                    </Col>
+                                </Form.Group>
+                            </Form.Row>
 
-                    <Form.Group id="formGridCheckbox">
-                        <Form.Check type="checkbox" label="Check me out" />
-                    </Form.Group>
-
-                    <Button variant="primary" type="submit">
-                        Save
-                    </Button>
-                </Form>
+                            <Button variant="primary" type="submit">
+                                Save
+                            </Button>
+                        </Form>
+                    </Fragment>
+                }
             </header>
         )
     }
 }
+
+
+Edit.defaultProps = {
+    post: {
+        title: '',
+        text: '',
+    }
+}
+
+export default Edit;

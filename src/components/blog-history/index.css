@@ -1,0 +1,10 @@
+
+.blog-history {
+    padding-right: 50px;
+    border-right: 1px solid grey;
+    margin-right: 50px;
+}
+
+.blog-history a {
+    margin: 30px auto;
+}

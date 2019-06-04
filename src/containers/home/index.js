@@ -4,9 +4,10 @@ import Spinner from 'react-bootstrap/Spinner';
 import Alert from 'react-bootstrap/Alert';
 
 import './index.css';
-import DataTable from '../../components/datatable';
-import request from '../../utils/request';
-import { baseApiUrl } from '../../utils/const';
+import BlogPost from 'components/blog-post';
+import BlogHistory from 'components/blog-history';
+import request from 'utils/request';
+import { baseApiUrl } from 'utils/const';
 
 
 export default class Home extends PureComponent {
@@ -16,6 +17,7 @@ export default class Home extends PureComponent {
         this.state = {
             data: [],
             loading: true,
+            success: '',
             error: '',
         };
 
@@ -28,37 +30,44 @@ export default class Home extends PureComponent {
     }
 
     getData(){
-        request(`${baseApiUrl}/employees`)
+        request(`${baseApiUrl}`)
             .then(data => {
-                this.setState({ data, loading: false })
+                this.setState({ data, loading: false });
             })
             .catch(error => {
-                this.setState({ error, loading: false })
+                this.setState({ error, loading: false });
             });
     }
 
     deleteData(id){
-        request(`${baseApiUrl}/delete/${id}`, {
-            method: 'DELETE'
-        })
-            .then(() => {
-                this.getData();
+        this.setState({ loading: true }, () => {
+            request(`${baseApiUrl}/${id}`, {
+                method: 'DELETE'
             })
-            .catch(error => {
-                this.setState({ error });
-            });
+                .then(success => {
+                    this.setState({ success }, this.getData);
+                     this.getData();
+                })
+                .catch(error => {
+                    this.setState({ error });
+                });
+        });
     }
 
     render(){
         return (
-            <header className='home-container'>
-                {
-                    this.state.loading ? <Spinner animation="border" variant='primary'/> :
-                    this.state.error ? <Alert variant='danger'>{this.state.error}</Alert> :
-                    <DataTable
-                        data={this.state.data}
-                        deleteData={this.deleteData}
-                    />
+            <header className='home-page'>
+                {this.state.error ? <Alert variant='danger'>{this.state.error}</Alert> : null}
+                {this.state.success ? <Alert variant='primary'>{this.state.success}</Alert> : null}
+            
+                {this.state.loading ? <Spinner animation="border" variant='primary' /> :
+                    <div className='home-content'>
+                        <BlogHistory posts={this.state.data} />
+                        <div className='blog-posts'>
+                            {this.state.data.map(post => <BlogPost post={post} deleteData={this.deleteData} key={post.id} />)}
+                        </div>
+                    </div>
+                    
                 }
             </header>
         );

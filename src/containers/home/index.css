@@ -1,5 +1,17 @@
-.home-container {
-    padding-top: 20px;
-    width: 90%;
+
+
+.home-page {
+    max-width: 1440px;
     margin: 0 auto;
+}
+
+.home-page .home-content {
+    display: flex;
+    align-items: stretch;
+    padding: 20px;
+    margin: 0 auto;
+}
+
+.home-page .blog-posts {
+    width: 70%;
 }
