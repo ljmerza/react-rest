@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import 'react-table/react-table.css';
 import Spinner from 'react-bootstrap/Spinner';
 import Alert from 'react-bootstrap/Alert';
@@ -9,7 +9,7 @@ import request from '../../utils/request';
 import { baseApiUrl } from '../../utils/const';
 
 
-export default class Home extends Component {
+export default class Home extends PureComponent {
     constructor(props){
         super(props);
 
@@ -29,16 +29,24 @@ export default class Home extends Component {
 
     getData(){
         request(`${baseApiUrl}/employees`)
-            .then(data => this.setState({ data, loading: false }))
-            .catch(error => this.setState({ error, loading: false }));
+            .then(data => {
+                this.setState({ data, loading: false })
+            })
+            .catch(error => {
+                this.setState({ error, loading: false })
+            });
     }
 
     deleteData(id){
         request(`${baseApiUrl}/delete/${id}`, {
             method: 'DELETE'
         })
-        .then(() => this.getData())
-        .catch(error => this.setState({ error }));
+            .then(() => {
+                this.getData();
+            })
+            .catch(error => {
+                this.setState({ error });
+            });
     }
 
     render(){

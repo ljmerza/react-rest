@@ -6,8 +6,8 @@ import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 
 import './index.css';
-import request from '../../utils/request';
-import { baseApiUrl } from '../../utils/const';
+import request from 'utils';
+import { baseApiUrl } from 'utils/const';
 
 
 export default class Contact extends Component {
