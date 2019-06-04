@@ -13,16 +13,22 @@ import { baseApiUrl } from '../../utils/const';
 export default class Contact extends Component {
     constructor(props) {
         super(props);
+
+        this.defaultFormState = {
+            employee_name: '',
+            employee_age: '',
+            employee_salary: ''
+        }
         
         this.state = {
-            body: {},
+            body: { ...this.defaultFormState },
             success: '',
             error: '',
             id: (props.match && props.match.params && props.match.params.id) || null,
         };
 
+        this.getData = this.getData.bind(this);
         this.handleChange = this.handleChange.bind(this);
-        this.resetForm = this.resetForm.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleFormResponse = this.handleFormResponse.bind(this);
     }
@@ -42,7 +48,9 @@ export default class Contact extends Component {
     handleChange(event) {
         event.preventDefault();
         const { id, value } = event.target;
-        this.setState({ body: { ...this.state.body, [id]: value} });
+        
+        const body = { ...this.state.body, [id]: value };
+        this.setState({ body });
     }
 
     handleSubmit(event) {
@@ -50,28 +58,28 @@ export default class Contact extends Component {
         const urlPath = this.state.id ? `update/${this.state.id}` : 'create';
         const method = this.state.id ? `PUT` : 'POST';
 
+        const postBody = Object.keys(this.state.body).reduce((acc, curr) => {
+            acc[ curr.split('_')[1] ] = this.state.body[curr];
+            return acc;
+        }, {});
+
         request(`${baseApiUrl}/${urlPath}`, {
             method: method,
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(this.state.body)
+            body: JSON.stringify(postBody)
         })
-        .then(response => {
-            this.handleFormResponse({ success: 'Saved!' });
-            !this.state.id && this.resetForm();
-        })
-        .catch(error => {
-            this.handleFormResponse({ error: 'Error!' });
-        });
-    }
-
-    resetForm() {
-        this.setState({ body: {} });
+            .then(response => {
+                this.handleFormResponse({ success: 'Saved!' });
+            })
+            .catch(error => {
+                this.handleFormResponse({ error: 'Error!' });
+            });
     }
 
     handleFormResponse({ error = '', success = '' }) {
-        this.setState({ success, error, body: {} });
+        this.setState({ success, error, body: { ...this.defaultFormState } });
     }
 
     render(){
@@ -82,20 +90,20 @@ export default class Contact extends Component {
 
                 <Form onSubmit={this.handleSubmit}>
                     <Form.Row>
-                        <Form.Group as={Col} controlId="name">
+                        <Form.Group as={Col} controlId="employee_name">
                             <Form.Label>Name</Form.Label>
-                            <Form.Control value={this.state.body.employee_name} onChange={this.handleChange}/>
+                            <Form.Control type='text' value={this.state.body.employee_name} onChange={this.handleChange}/>
                         </Form.Group>
                     </Form.Row>
 
                     <Form.Row>
-                        <Form.Group as={Col} controlId="age">
+                        <Form.Group as={Col} controlId="employee_age">
                             <Form.Label>Age</Form.Label>
-                            <Form.Control value={this.state.body.employee_age} onChange={this.handleChange}/>
+                            <Form.Control type='text' value={this.state.body.employee_age} onChange={this.handleChange}/>
                         </Form.Group>
-                        <Form.Group as={Col} controlId="salary">
+                        <Form.Group as={Col} controlId="employee_salary">
                             <Form.Label>Salary</Form.Label>
-                            <Form.Control value={this.state.body.employee_salary} onChange={this.handleChange}/>
+                            <Form.Control type='text' value={this.state.body.employee_salary} onChange={this.handleChange}/>
                         </Form.Group>
                     </Form.Row>
 
