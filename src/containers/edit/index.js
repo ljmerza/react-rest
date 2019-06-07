@@ -23,22 +23,16 @@ class Edit extends Component {
             loading: false,
             id: (props.match && props.match.params && props.match.params.id) || null,
         };
-
-        this.getData = this.getData.bind(this);
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleFormResponse = this.handleFormResponse.bind(this);
     }
 
     componentDidMount() {
-
         // if given a post id then fetch psot for edit else is a new post
         if(this.state.id !== null){
             this.setState({ loading: true }, this.getData);
         }
     }
 
-    getData() {
+    getData = () =>
         this.setState({ loading: true }, () => {
             request(`${baseApiUrl}/${this.state.id}`)
                 .then(post => {
@@ -48,9 +42,8 @@ class Edit extends Component {
                     this.setState({ error, loading: false })
                 });
         });
-    }
 
-    handleChange(event) {
+    handleChange = (event) => {
         event.preventDefault();
         const { id, value } = event.target;
         
@@ -58,7 +51,7 @@ class Edit extends Component {
         this.setState({ post });
     }
 
-    handleSubmit(event) {
+    handleSubmit = (event) => {
         event.preventDefault();
         const postBody = { ...this.state.post };
         postBody.timestamp = postBody.timestamp || new Date();
@@ -81,7 +74,7 @@ class Edit extends Component {
         });
     }
 
-    handleFormResponse({ error = '', success = '' }) {
+    handleFormResponse = ({ error = '', success = '' }) => {
         const posts = this.state.id ? this.state.post : this.props.post;
         this.setState({ success, error, post: { ...posts }, loading: false });
     }
